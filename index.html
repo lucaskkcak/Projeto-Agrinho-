@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroMaster: Do Campo à Cidade</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f1e8 0%, #e8f5e9 100%);
+            color: #3d3d3d;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+        }
+
+        header {
+            background: linear-gradient(90deg, #8b5a2b 0%, #2d5016 100%);
+            color: #f5f1e8;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #f5f1e8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .game-wrapper {
+            background: white;
+            border: 4px solid #8b5a2b;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        #p5-container {
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(180deg, #87ceeb 0%, #90ee90 100%);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        /* Menu Styles */
+        #menu-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #8b5a2b 0%, #2d5016 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .menu-content {
+            text-align: center;
+            color: white;
+        }
+
+        .menu-content h1 {
+            font-size: 3.5rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-content p {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: #f5f1e8;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .menu-btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-btn.start {
+            background: linear-gradient(90deg, #228b22 0%, #32cd32 100%);
+            color: white;
+        }
+
+        .menu-btn.start:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .menu-btn.instructions {
+            background: linear-gradient(90deg, #c4622d 0%, #d4a574 100%);
+            color: white;
+        }
+
+        .menu-btn.instructions:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Instructions Modal */
+        #instructions-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .instructions-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .instructions-content h2 {
+            color: #8b5a2b;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .instructions-content h3 {
+            color: #228b22;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .instructions-content p {
+            color: #555;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .instructions-content ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .instructions-content li {
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .close-btn {
+            background: #8b5a2b;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #2d5016;
+            transform: scale(1.05);
+        }
+
+        footer {
+            background-color: #8b5a2b;
+            color: #f5f1e8;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-top: 4px solid #2d5016;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .menu-content h1 {
+                font-size: 2rem;
+            }
+
+            .menu-content p {
+                font-size: 1rem;
+            }
+
+            .menu-buttons {
+                gap: 1rem;
+            }
+
+            .menu-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .instructions-content {
+                margin: 1rem;
+                max-height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌾 AgroMaster: Do Campo à Cidade</h1>
+        <p>Gerencie sua produção agrícola e construa um império sustentável</p>
+    </header>
+
+    <div id="menu-screen">
+        <div class="menu-content">
+            <h1>🌾 AgroMaster</h1>
+            <p>Do Campo à Cidade</p>
+            <div class="menu-buttons">
+                <button class="menu-btn start" onclick="iniciarJogo()">▶️ Iniciar Jogo</button>
+                <button class="menu-btn instructions" onclick="mostrarInstrucoes()">📖 Instruções</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructions-modal">
+        <div class="instructions-content">
+            <h2>📖 Como Jogar</h2>
+            
+            <h3>🎯 Objetivo</h3>
+            <p>Ganhe R$ 5.000, mantenha 90% de reputação e expanda sua terra para vencer o jogo!</p>
+
+            <h3>🌽 Produção</h3>
+            <ul>
+                <li>Clique nas plantações prontas (com brilho amarelo) para colher</li>
+                <li>O clima e a estação afetam a produção</li>
+                <li>Máquinas aumentam a produção em 20% cada</li>
+            </ul>
+
+            <h3>🏙️ Demandas</h3>
+            <ul>
+                <li>Atenda as demandas da cidade clicando nelas</li>
+                <li>Quanto mais rápido você atender, melhor sua reputação</li>
+                <li>Demandas expiram se não forem atendidas a tempo</li>
+            </ul>
+
+            <h3>🌱 Sustentabilidade</h3>
+            <ul>
+                <li>Mantenha a saúde do solo acima de 50%</li>
+                <li>Pratique rotação de culturas (+10% saúde)</li>
+                <li>Deixe a terra descansar (+5% saúde)</li>
+                <li>Solo saudável = +30% produção</li>
+            </ul>
+
+            <h3>💰 Recursos</h3>
+            <ul>
+                <li><strong>Dinheiro:</strong> Ganhe vendendo produtos</li>
+                <li><strong>Reputação:</strong> +3% por demanda atendida</li>
+                <li><strong>Estoque:</strong> Armazém de produtos</li>
+                <li><strong>Terra:</strong> Expanda para mais espaço de plantio</li>
+            </ul>
+
+            <h3>🌍 Clima & Estações</h3>
+            <ul>
+                <li>☀️ Ensolarado: +20% produção</li>
+                <li>🌧️ Chuvoso: +10% produção</li>
+                <li>🏜️ Seca: -40% produção</li>
+                <li>❄️ Geada: -50% produção</li>
+                <li>🦗 Pragas: -60% produção</li>
+            </ul>
+
+            <button class="close-btn" onclick="fecharInstrucoes()">Fechar</button>
+        </div>
+    </div>
+
+    <div class="container" id="game-container" style="display: none;">
+        <div class="game-wrapper">
+            <div id="p5-container"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>AgroMaster © 2026 | Um jogo de estratégia e gestão agrícola sustentável</p>
+        <p>Desenvolvido com p5.js | Design: Modernismo Agrícola</p>
+    </footer>
+
+    <script>
+        let gameStarted = false;
+
+        function iniciarJogo() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            gameStarted = true;
+            
+            if (typeof setup === 'function') {
+                setup();
+            }
+        }
+
+        function mostrarInstrucoes() {
+            document.getElementById('instructions-modal').style.display = 'flex';
+        }
+
+        function fecharInstrucoes() {
+            document.getElementById('instructions-modal').style.display = 'none';
+        }
+
+        // Fechar instruções ao clicar fora
+        document.getElementById('instructions-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharInstrucoes();
+            }
+        });
+
+        // AgroMaster Game - Sketch.js com Menu
+        let producao = [];
+        let demanda = [];
+        let maquinas = [];
+        let mensagens = [];
+        let fabrica = null;
+
+        let estoque = {
+            graos: 50,
+            energia: 30,
+            fibras: 40,
+            processados: 20
+        };
+
+        let dinheiro = 1500;
+        let reputacao = 80;
+        let dia = 1;
+        let estacao = "Primavera";
+        let clima = "Ensolarado";
+        let climaTimer = 0;
+        let gameOver = false;
+        let vitoria = false;
+        let terraExpandida = false;
+        let diaTimer = 0;
+        let lastClickTime = 0;
+
+        let saudeSolo = 75;
+        let ultimoCultivo = null;
+        let diasDescanso = 0;
+        let historicoRotacao = [];
+
+        let precos = {
+            graos: 5,
+            energia: 8,
+            fibras: 7,
+            processados: 15
+        };
+
+        let custos = {
+            maquina: 500,
+            expansao: 800
+        };
+
+        class Producao {
+            constructor(x = null, y = null) {
+                this.x = x !== null ? x : random(60, terraExpandida ? width - 320 : width - 420);
+                this.y = y !== null ? y : random(height - 180, height - 80);
+                this.tipos = ["graos", "energia", "fibras"];
+                this.tipo = this.tipos[floor(random(3))];
+                this.progresso = 0;
+                this.pronto = false;
+                this.velocidade = random(0.5, 1.2);
+                this.icone = this.tipo === "graos" ? "🌽" : (this.tipo === "energia" ? "🎋" : "☁️");
+            }
+
+            atualiza() {
+                if (!this.pronto) {
+                    let bonusClima = 1;
+                    if (clima === "Ensolarado") bonusClima = 1.2;
+                    else if (clima === "Chuvoso") bonusClima = 1.1;
+                    else if (clima === "Seca") bonusClima = 0.6;
+                    else if (clima === "Geada") bonusClima = 0.5;
+                    else if (clima === "Pragas") bonusClima = 0.4;
+
+                    let bonusEstacao = 1;
+                    if (estacao === "Primavera" && this.tipo === "graos") bonusEstacao = 1.3;
+                    if (estacao === "Verão" && this.tipo === "energia") bonusEstacao = 1.3;
+                    if (estacao === "Outono" && this.tipo === "fibras") bonusEstacao = 1.3;
+
+                    let bonusSustentabilidade = 1;
+                    if (saudeSolo >= 80) bonusSustentabilidade = 1.3;
+                    else if (saudeSolo >= 60) bonusSustentabilidade = 1.15;
+                    else if (saudeSolo < 30) bonusSustentabilidade = 0.5;
+                    else if (saudeSolo < 50) bonusSustentabilidade = 0.8;
+
+                    this.progresso += this.velocidade * bonusClima * bonusEstacao * bonusSustentabilidade * 0.3;
+
+                    if (this.progresso >= 100) {
+                        this.pronto = true;
+                        this.progresso = 100;
+                    }
+                }
+            }
+
+            desenha() {
+                push();
+                translate(this.x, this.y);
+
+                fill(0, 0, 0, 150);
+                rect(-20, -35, 40, 8);
+                fill(0, 200, 0);
+                rect(-20, -35, this.progresso * 0.4, 8);
+
+                textSize(40);
+                textAlign(CENTER);
+                text(this.icone, 0, 0);
+
+                if (this.pronto) {
+                    fill(255, 255, 0, 100);
+                    ellipse(0, 0, 50, 50);
+                }
+
+                textAlign(LEFT);
+                pop();
+            }
+
+            verificaClique(mx, my) {
+                let d = dist(mx, my, this.x, this.y);
+                return d < 30;
+            }
+
+            colher() {
+                let quantidade = floor(random(5, 15));
+
+                if (clima === "Ensolarado") quantidade *= 1.2;
+                if (clima === "Chuvoso") quantidade *= 1.1;
+                if (clima === "Seca") quantidade *= 0.6;
+                if (clima === "Geada") quantidade *= 0.5;
+                if (clima === "Pragas") quantidade *= 0.4;
+
+                if (saudeSolo >= 80) quantidade *= 1.3;
+                else if (saudeSolo >= 60) quantidade *= 1.15;
+                else if (saudeSolo < 30) quantidade *= 0.5;
+                else if (saudeSolo < 50) quantidade *= 0.8;
+
+                this.pronto = false;
+                this.progresso = 0;
+                return floor(quantidade);
+            }
+        }
+
+        class Demanda {
+            constructor(indice = 0) {
+                // Fila vertical no lado direito
+                this.x = width - 80;
+                this.y = 200 + (indice * 70);
+                
+                this.tipos = ["graos", "energia", "fibras", "processados"];
+                this.tipo = this.tipos[floor(random(4))];
+                this.quantidade = floor(random(10, 40));
+                this.tempoRestante = 600; // 60 segundos (10 frames por segundo)
+                this.icone = this.tipo === "graos" ? "🌽" : (this.tipo === "energia" ? "🎋" : (this.tipo === "fibras" ? "☁️" : "🏭"));
+                this.recompensa = this.quantidade * precos[this.tipo];
+            }
+
+            desenha() {
+                push();
+                translate(this.x, this.y);
+
+                fill(0, 0, 0, 200);
+                rect(-45, -20, 90, 50, 8);
+
+                textSize(24);
+                text(this.icone, -35, 5);
+
+                fill(255);
+                textSize(12);
+                text(this.quantidade + "x", -15, 5);
+
+                let cor = color(0, 255, 0);
+                if (this.tempoRestante < 300) cor = color(255, 255, 0);
+                if (this.tempoRestante < 150) cor = color(255, 0, 0);
+                fill(cor);
+                textSize(9);
+                text("⏱️ " + floor(this.tempoRestante/10) + "s", -35, -10);
+
+                fill(255, 215, 0);
+                textSize(10);
+                text("R$" + this.recompensa, 5, -10);
+
+                pop();
+            }
+
+            verificaClique(mx, my) {
+                let d = dist(mx, my, this.x, this.y);
+                return d < 40;
+            }
+        }
+
+        class Maquina {
+            constructor() {
+                this.x = random(100, width - 300);
+                this.y = height - 180;
+                this.velocidade = random(1, 3);
+                this.direcao = random([1, -1]);
+                this.oscilacao = 0;
+            }
+
+            atualiza() {
+                this.x += this.velocidade * this.direcao;
+                this.oscilacao += 0.05;
+                
+                if (this.x > width - 100) {
+                    this.direcao = -1;
+                } else if (this.x < 100) {
+                    this.direcao = 1;
+                }
+            }
+
+            desenha() {
+                push();
+                let yOffset = sin(this.oscilacao) * 8;
+                translate(this.x, this.y + yOffset);
+                
+                if (this.direcao === -1) {
+                    scale(-1, 1);
+                }
+                
+                textSize(40);
+                text("🚜", 0, 0);
+                
+                fill(255, 255, 100, 200);
+                textSize(9);
+                textAlign(CENTER);
+                text("Trabalhando", 0, 18);
+                textAlign(LEFT);
+                
+                pop();
+            }
+        }
+
+        class Fabrica {
+            constructor() {
+                this.x = width - 250;
+                this.y = height - 100;
+                this.processando = false;
+                this.tempoProcessamento = 0;
+                this.tempoMaximo = 150;
+            }
+
+            desenha() {
+                push();
+                translate(this.x, this.y);
+
+                fill(0, 0, 0, 50);
+                ellipse(0, 55, 80, 15);
+
+                fill(139, 90, 43);
+                rect(-35, -35, 70, 55, 5);
+                
+                stroke(101, 67, 33);
+                strokeWeight(3);
+                rect(-35, -35, 70, 55, 5);
+                noStroke();
+
+                fill(255, 200, 0, 150);
+                rect(-25, -25, 12, 12);
+                rect(13, -25, 12, 12);
+                rect(-8, -8, 12, 12);
+
+                fill(100, 100, 100);
+                rect(-22, -50, 12, 20);
+                rect(10, -50, 12, 20);
+                
+                fill(80, 80, 80);
+                rect(-22, -52, 12, 3);
+                rect(10, -52, 12, 3);
+
+                if (this.processando) {
+                    fill(200, 200, 200, 100);
+                    let smokeY = -50 - (this.tempoProcessamento % 30) * 1.5;
+                    ellipse(-16, smokeY, 8, 8);
+                    ellipse(16, smokeY, 8, 8);
+                    
+                    fill(180, 180, 180, 80);
+                    ellipse(-16, smokeY - 10, 10, 10);
+                    ellipse(16, smokeY - 10, 10, 10);
+                }
+
+                fill(50, 50, 50);
+                rect(-25, 15, 50, 8, 4);
+                
+                stroke(100, 100, 100);
+                strokeWeight(1);
+                rect(-25, 15, 50, 8, 4);
+                noStroke();
+
+                if (this.processando) {
+                    let progresso = (this.tempoProcessamento / this.tempoMaximo);
+                    
+                    fill(255, 200, 0);
+                    rect(-25, 15, 50 * progresso, 8, 4);
+                    
+                    fill(255, 255, 100, 100);
+                    rect(-25, 15, 50 * progresso, 4, 4);
+                } else {
+                    fill(100, 200, 100);
+                    rect(-25, 15, 50, 8, 4);
+                    
+                    fill(150, 255, 150, 100);
+                    rect(-25, 15, 50, 4, 4);
+                }
+
+                fill(255);
+                textSize(10);
+                textAlign(CENTER);
+                text(this.processando ? "PROCESSANDO" : "PRONTO", 0, 32);
+                textAlign(LEFT);
+
+                textSize(28);
+                text("🏭", -12, 0);
+
+                pop();
+            }
+
+            verificaClique(mx, my) {
+                let d = dist(mx, my, this.x, this.y);
+                return d < 40;
+            }
+
+            processar() {
+                if (!this.processando && estoque.graos >= 5) {
+                    this.processando = true;
+                    this.tempoProcessamento = 0;
+                    estoque.graos -= 5;
+                    return true;
+                }
+                return false;
+            }
+
+            atualiza() {
+                if (this.processando) {
+                    this.tempoProcessamento++;
+                    if (this.tempoProcessamento >= this.tempoMaximo) {
+                        this.processando = false;
+                        estoque.processados += 3;
+                        mensagens.push(new Mensagem("🏭 5 Graos -> 3 Processados!", this.x, this.y - 50, color(100, 255, 100)));
+                    }
+                }
+            }
+        }
+
+        class Mensagem {
+            constructor(texto, x, y, cor) {
+                this.texto = texto;
+                this.x = x;
+                this.y = y;
+                this.cor = cor;
+                this.tempo = 100;
+            }
+
+            desenha() {
+                this.tempo--;
+                let alpha = map(this.tempo, 0, 100, 0, 255);
+                fill(red(this.cor), green(this.cor), blue(this.cor), alpha);
+                textSize(14);
+                textAlign(CENTER);
+                text(this.texto, this.x, this.y - this.tempo / 3);
+                textAlign(LEFT);
+            }
+
+            isDone() {
+                return this.tempo <= 0;
+            }
+        }
+
+        function setup() {
+            if (!gameStarted) return;
+            
+            let container = document.getElementById('p5-container');
+            let w = window.innerWidth - 40;
+            let h = 700;
+            createCanvas(w, h);
+            textFont("Courier New");
+
+            for (let i = 0; i < 4; i++) {
+                producao.push(new Producao());
+            }
+
+            for (let i = 0; i < 3; i++) {
+                demanda.push(new Demanda(i));
+            }
+
+            fabrica = new Fabrica();
+        }
+
+        function draw() {
+            if (!gameStarted) return;
+
+            if (vitoria) {
+                telaVitoria();
+                return;
+            }
+
+            if (gameOver) {
+                telaGameOver();
+                return;
+            }
+
+            background(135, 206, 235);
+
+            desenhaCidade();
+            desenhaCampo();
+            atualizaClimaEEstacao();
+            desenhaEfeitoClima();
+
+            for (let i = producao.length - 1; i >= 0; i--) {
+                producao[i].atualiza();
+                producao[i].desenha();
+
+                if (producao[i].verificaClique(mouseX, mouseY) && mouseIsPressed && producao[i].pronto) {
+                    if (Date.now() - lastClickTime > 200) {
+                        colherProducao(i);
+                        lastClickTime = Date.now();
+                    }
+                }
+            }
+
+            for (let i = 0; i < maquinas.length; i++) {
+                maquinas[i].atualiza();
+                maquinas[i].desenha();
+            }
+
+            if (fabrica) {
+                fabrica.atualiza();
+                fabrica.desenha();
+
+                if (fabrica.verificaClique(mouseX, mouseY) && mouseIsPressed) {
+                    if (Date.now() - lastClickTime > 200) {
+                        if (fabrica.processar()) {
+                            mensagens.push(new Mensagem("🏭 Processamento iniciado! (15s)", fabrica.x, fabrica.y - 60, color(100, 200, 255)));
+                        } else {
+                            mensagens.push(new Mensagem("⚠️ Precisa de 5 Graos!", fabrica.x, fabrica.y - 60, color(255, 150, 50)));
+                        }
+                        lastClickTime = Date.now();
+                    }
+                }
+            }
+
+            for (let i = demanda.length - 1; i >= 0; i--) {
+                demanda[i].tempoRestante -= 0.5;
+                demanda[i].desenha();
+
+                if (demanda[i].verificaClique(mouseX, mouseY) && mouseIsPressed) {
+                    if (Date.now() - lastClickTime > 200) {
+                        atenderDemanda(i);
+                        lastClickTime = Date.now();
+                    }
+                }
+            }
+
+            desenhaInterface();
+            desenhaBotoes();
+            desenhaMensagens();
+
+            diaTimer++;
+            if (diaTimer >= 600) {
+                diaTimer = 0;
+                dia++;
+
+                atualizaSustentabilidade();
+
+                for (let d of demanda) {
+                    if (d.tempoRestante <= 0) {
+                        reputacao -= 5;
+                        dinheiro -= 20;
+                        mensagens.push(new Mensagem("⚠️ Demanda não atendida! -5 reputação", width/2, 200, color(255, 100, 100)));
+                    }
+                }
+
+                demanda = demanda.filter(d => d.tempoRestante > 0);
+
+                if (demanda.length < 5) {
+                    demanda.push(new Demanda(demanda.length));
+                }
+
+                if (reputacao <= 0 || dinheiro < -200) {
+                    gameOver = true;
+                }
+
+                if (dia >= 31) {
+                    if (dinheiro >= 5000 && reputacao >= 90 && terraExpandida) {
+                        vitoria = true;
+                    } else {
+                        gameOver = true;
+                    }
+                } else if (dinheiro >= 5000 && reputacao >= 90 && terraExpandida) {
+                    vitoria = true;
+                }
+
+                mensagens.push(new Mensagem("📅 Dia " + dia + " - " + estacao, width/2, 100, color(100, 200, 255)));
+            }
+
+            fill(255);
+            textSize(12);
+            textAlign(CENTER);
+            text("Clique nas plantações prontas para colher | Clique nas demandas para vender", width/2, height - 15);
+            textAlign(LEFT);
+        }
+
+        function atualizaSustentabilidade() {
+            if (ultimoCultivo === null) {
+                diasDescanso++;
+                if (diasDescanso >= 3) {
+                    saudeSolo = min(saudeSolo + 5, 100);
+                    diasDescanso = 0;
+                    mensagens.push(new Mensagem("🌱 Terra descansada! +5% saúde do solo", width/2, 250, color(34, 139, 34)));
+                }
+            } else {
+                if (historicoRotacao.length > 0) {
+                    let ultimoTipo = historicoRotacao[historicoRotacao.length - 1];
+                    if (ultimoTipo !== ultimoCultivo) {
+                        saudeSolo = min(saudeSolo + 10, 100);
+                        mensagens.push(new Mensagem("♻️ Rotação de culturas! +10% saúde do solo", width/2, 250, color(34, 139, 34)));
+                    } else {
+                        if (historicoRotacao.filter(t => t === ultimoCultivo).length >= 3) {
+                            saudeSolo = max(saudeSolo - 15, 0);
+                            mensagens.push(new Mensagem("⚠️ Monocultura! -15% saúde do solo", width/2, 250, color(255, 100, 50)));
+                        }
+                    }
+                }
+            }
+
+            if (maquinas.length > 3) {
+                saudeSolo = max(saudeSolo - 2, 0);
+            }
+
+            if (saudeSolo > 70) {
+                reputacao = min(reputacao + 2, 100);
+            }
+
+            ultimoCultivo = null;
+            diasDescanso = 0;
+        }
+
+        function desenhaCidade() {
+            for (let i = 0; i < 8; i++) {
+                let w = 30;
+                let h = 60 + i * 15;
+                let x = width - 100 + i * 35;
+                let y = height - 180 - (i % 3) * 20;
+                
+                fill(0, 0, 0, 80);
+                rect(x + 2, y + h + 2, w, 5);
+                
+                fill(100 + i * 10, 100 + i * 8, 120 + i * 5);
+                rect(x, y, w, h, 3);
+                
+                stroke(60, 60, 80);
+                strokeWeight(2);
+                rect(x, y, w, h, 3);
+                noStroke();
+                
+                fill(255, 255, 100);
+                for (let j = 0; j < 4; j++) {
+                    for (let k = 0; k < 2; k++) {
+                        rect(x + 5 + k * 12, y + 8 + j * 12, 5, 5);
+                    }
+                }
+                
+                fill(80, 80, 100);
+                triangle(x, y, x + w/2, y - 8, x + w, y);
+            }
+        }
+
+        function desenhaCampo() {
+            fill(120, 85, 50);
+            rect(0, height - 200, width, 200);
+            
+            fill(60, 120, 40);
+            rect(0, height - 210, width, 15);
+            
+            stroke(40, 100, 30);
+            strokeWeight(1);
+            for (let i = 0; i < width; i += 8) {
+                line(i, height - 210, i + 3, height - 200);
+                line(i + 4, height - 210, i + 7, height - 200);
+            }
+            noStroke();
+            
+            stroke(80, 60, 30);
+            strokeWeight(2);
+            for (let i = 0; i < 10; i++) {
+                line(30 + i * 80, height - 210, 30 + i * 80, height - 50);
+            }
+            
+            stroke(139, 90, 43);
+            strokeWeight(3);
+            for (let i = 0; i < 10; i++) {
+                line(30 + i * 80, height - 210, 30 + i * 80, height - 190);
+                line(20 + i * 80, height - 195, 40 + i * 80, height - 195);
+            }
+            noStroke();
+            
+            stroke(60, 40, 20, 100);
+            strokeWeight(1);
+            for (let i = 0; i < 8; i++) {
+                line(52 + i * 100, height - 190, 52 + i * 100, height - 50);
+            }
+            noStroke();
+        }
+
+        function desenhaInterface() {
+            fill(0, 0, 0, 200);
+            rect(0, 0, width, 160);
+
+            fill(255, 215, 0);
+            textSize(22);
+            text("💰 R$ " + floor(dinheiro), 20, 35);
+
+            fill(255);
+            textSize(16);
+            text("⭐ Reputação: " + reputacao + "%", 20, 65);
+
+            fill(100, 200, 255);
+            text("📅 Dia " + dia + " - " + estacao, 20, 95);
+
+            let corClima = color(200, 200, 200);
+            if (clima === "Ensolarado") corClima = color(255, 255, 0);
+            if (clima === "Chuvoso") corClima = color(100, 100, 255);
+            if (clima === "Seca") corClima = color(255, 100, 50);
+            if (clima === "Geada") corClima = color(150, 200, 255);
+            if (clima === "Pragas") corClima = color(150, 50, 50);
+            fill(corClima);
+            text("🌤️ Clima: " + clima, 20, 125);
+
+            fill(34, 139, 34);
+            textSize(14);
+            text("🌱 Solo: " + floor(saudeSolo) + "%", width - 280, 35);
+
+            fill(200, 200, 200);
+            textSize(14);
+            text("📦 ESTOQUE:", width - 280, 65);
+            text("🌽 Grãos: " + floor(estoque.graos), width - 280, 85);
+            text("🎋 Energia: " + floor(estoque.energia), width - 280, 105);
+            text("☁️ Fibras: " + floor(estoque.fibras), width - 280, 125);
+            text("🏭 Processados: " + floor(estoque.processados), width - 280, 145);
+
+            fill(100, 255, 100);
+            textSize(12);
+            text("💰 PREÇOS:", width - 130, 35);
+            text("🌽 R$" + precos.graos, width - 130, 55);
+            text("🎋 R$" + precos.energia, width - 130, 70);
+            text("☁️ R$" + precos.fibras, width - 130, 85);
+            text("🏭 R$" + precos.processados, width - 130, 100);
+        }
+
+        function desenhaBotoes() {
+            // Botão Cuidar do Solo
+            fill(139, 69, 19, 200);
+            rect(width - 180, height - 70, 160, 40, 8);
+            fill(255);
+            textSize(12);
+            textAlign(CENTER);
+            text("🌱 Cuidar do Solo (R$100)", width - 100, height - 45);
+
+            if (mouseIsPressed && mouseX > width - 180 && mouseX < width - 20 && mouseY > height - 70 && mouseY < height - 30) {
+                if (Date.now() - lastClickTime > 200) {
+                    if (saudeSolo >= 100) {
+                        mensagens.push(new Mensagem("✅ Solo já está em perfeito estado!", width/2, 200, color(100, 255, 100)));
+                    } else if (dinheiro >= 100) {
+                        dinheiro -= 100;
+                        saudeSolo = min(saudeSolo + 15, 100);
+                        mensagens.push(new Mensagem("🌱 Solo cuidado! +15% saúde", width/2, 200, color(100, 255, 100)));
+                    } else {
+                        mensagens.push(new Mensagem("💰 Dinheiro insuficiente!", width/2, 200, color(255, 100, 100)));
+                    }
+                    lastClickTime = Date.now();
+                }
+            }
+
+            // Botão Comprar Máquina
+            fill(50, 100, 200, 200);
+            rect(width - 180, height - 120, 160, 40, 8);
+            fill(255);
+            textSize(12);
+            text("🚜 Comprar Máquina (R$" + custos.maquina + ")", width - 100, height - 95);
+
+            if (mouseIsPressed && mouseX > width - 180 && mouseX < width - 20 && mouseY > height - 120 && mouseY < height - 80) {
+                if (Date.now() - lastClickTime > 200) {
+                    if (dinheiro >= custos.maquina) {
+                        dinheiro -= custos.maquina;
+                        maquinas.push(new Maquina());
+                        mensagens.push(new Mensagem("🚜 Máquina adquirida! Produção acelerada!", width/2, 200, color(100, 255, 100)));
+                    } else {
+                        mensagens.push(new Mensagem("💰 Dinheiro insuficiente!", width/2, 200, color(255, 100, 100)));
+                    }
+                    lastClickTime = Date.now();
+                }
+            }
+
+            // Botão Expandir Terra
+            if (!terraExpandida) {
+                fill(50, 200, 100, 200);
+                rect(width - 180, height - 170, 160, 40, 8);
+                fill(255);
+                text("🌾 Expandir Terra (R$" + custos.expansao + ")", width - 100, height - 145);
+
+                if (mouseIsPressed && mouseX > width - 180 && mouseX < width - 20 && mouseY > height - 170 && mouseY < height - 130) {
+                    if (Date.now() - lastClickTime > 200) {
+                        if (dinheiro >= custos.expansao) {
+                            dinheiro -= custos.expansao;
+                            terraExpandida = true;
+                            for (let i = 0; i < 3; i++) {
+                                producao.push(new Producao());
+                            }
+                            mensagens.push(new Mensagem("🌾 Terra expandida! +3 espaços de plantio!", width/2, 200, color(100, 255, 100)));
+                        } else {
+                            mensagens.push(new Mensagem("💰 Dinheiro insuficiente!", width/2, 200, color(255, 100, 100)));
+                        }
+                        lastClickTime = Date.now();
+                    }
+                }
+            }
+
+            textAlign(LEFT);
+        }
+
+        function colherProducao(index) {
+            let p = producao[index];
+            let quantidade = p.colher();
+
+            let bonus = maquinas.length * 0.2;
+            quantidade = floor(quantidade * (1 + bonus));
+
+            if (p.tipo === "graos") estoque.graos += quantidade;
+            else if (p.tipo === "energia") estoque.energia += quantidade;
+            else if (p.tipo === "fibras") estoque.fibras += quantidade;
+
+            ultimoCultivo = p.tipo;
+            historicoRotacao.push(p.tipo);
+            if (historicoRotacao.length > 5) historicoRotacao.shift();
+
+            mensagens.push(new Mensagem("🌾 +" + quantidade + " " + p.tipo + " colhido!", p.x, p.y - 20, color(100, 255, 100)));
+
+            producao[index] = new Producao(p.x, p.y);
+        }
+
+        function atenderDemanda(index) {
+            let d = demanda[index];
+            let custo = d.quantidade;
+            let estoqueAtual = estoque[d.tipo];
+
+            if (estoqueAtual >= custo) {
+                estoque[d.tipo] -= custo;
+                let ganho = custo * precos[d.tipo];
+
+                if (saudeSolo > 80) {
+                    ganho = floor(ganho * 1.2);
+                    mensagens.push(new Mensagem("✨ Produto premium! +20% valor", d.x, d.y - 40, color(255, 215, 0)));
+                }
+
+                dinheiro += ganho;
+                reputacao = min(reputacao + 3, 100);
+
+                mensagens.push(new Mensagem("✅ Demanda atendida! +R$" + ganho, d.x, d.y - 20, color(100, 255, 100)));
+                demanda.splice(index, 1);
+            } else {
+                mensagens.push(new Mensagem("❌ Estoque insuficiente! Falta " + (custo - estoqueAtual) + " " + d.tipo, d.x, d.y - 20, color(255, 100, 100)));
+                reputacao -= 2;
+            }
+        }
+
+        function atualizaClimaEEstacao() {
+            climaTimer++;
+
+            if (dia % 5 === 0 && diaTimer < 10) {
+                let estacoes = ["Primavera", "Verão", "Outono", "Inverno"];
+                let novaEstacao = estacoes[(floor(dia / 5)) % 4];
+                if (novaEstacao !== estacao) {
+                    estacao = novaEstacao;
+                    mensagens.push(new Mensagem("🍂 Mudou estação: " + estacao + "!", width/2, 150, color(200, 200, 100)));
+                }
+            }
+
+            if (climaTimer >= 300) {
+                climaTimer = 0;
+                let climas = ["Ensolarado", "Chuvoso", "Seca", "Geada", "Pragas"];
+                let pesos = [0.4, 0.2, 0.15, 0.1, 0.15];
+                let r = random(1);
+                let acum = 0;
+                for (let i = 0; i < climas.length; i++) {
+                    acum += pesos[i];
+                    if (r < acum) {
+                        clima = climas[i];
+                        break;
+                    }
+                }
+                mensagens.push(new Mensagem("🌦️ Clima mudou: " + clima, width/2, 180, color(200, 200, 100)));
+            }
+        }
+
+        function desenhaEfeitoClima() {
+            if (clima === "Chuvoso") {
+                fill(100, 100, 255, 50);
+                rect(0, 0, width, height);
+                for (let i = 0; i < 100; i++) {
+                    stroke(100, 100, 255, 100);
+                    strokeWeight(1);
+                    let x = random(width);
+                    let y = random(height);
+                    line(x, y, x - 5, y + 10);
+                }
+                noStroke();
+            }
+            else if (clima === "Seca") {
+                fill(255, 100, 50, 30);
+                rect(0, 0, width, height);
+            }
+            else if (clima === "Geada") {
+                fill(150, 200, 255, 60);
+                rect(0, 0, width, height);
+            }
+            else if (clima === "Pragas") {
+                fill(100, 50, 50, 50);
+                rect(0, 0, width, height);
+                textSize(20);
+                fill(150, 50, 50, 150);
+                text("🦗", random(width), random(height));
+                text("🐛", random(width), random(height));
+            }
+        }
+
+        function desenhaMensagens() {
+            for (let i = mensagens.length - 1; i >= 0; i--) {
+                mensagens[i].desenha();
+                if (mensagens[i].isDone()) {
+                    mensagens.splice(i, 1);
+                }
+            }
+        }
+
+        function telaGameOver() {
+            background(0, 0, 0, 200);
+            fill(255);
+            textSize(40);
+            textAlign(CENTER);
+            text("💀 GAME OVER 💀", width/2, height/2 - 60);
+            textSize(24);
+            text("Sua gestão durou " + dia + " dias", width/2, height/2);
+            text("Reputação final: " + reputacao + "%", width/2, height/2 + 40);
+            text("Dinheiro final: R$ " + floor(dinheiro), width/2, height/2 + 80);
+            text("Saúde do Solo: " + floor(saudeSolo) + "%", width/2, height/2 + 120);
+            textSize(18);
+            text("Clique para recomeçar", width/2, height/2 + 150);
+            textAlign(LEFT);
+
+            if (mouseIsPressed) {
+                restartGame();
+            }
+        }
+
+        function telaVitoria() {
+            background(20, 60, 20);
+            
+            fill(255, 215, 0, 100);
+            ellipse(width/2, height/2 - 150, 300, 300);
+            fill(255, 215, 0, 50);
+            ellipse(width/2, height/2 - 150, 400, 400);
+            
+            fill(255, 215, 0, 150);
+            textSize(30);
+            text("🎉", width/2 - 200, height/2 - 200);
+            text("🎊", width/2 + 200, height/2 - 200);
+            text("🌟", width/2 - 150, height/2 - 100);
+            text("⭐", width/2 + 150, height/2 - 100);
+            
+            fill(255, 215, 0);
+            textSize(70);
+            textAlign(CENTER);
+            text("🏆 PARABENS! 🏆", width/2, height/2 - 80);
+            
+            fill(100, 255, 100);
+            textSize(28);
+            text("Voce completou o desafio em 31 dias!", width/2, height/2 - 10);
+            
+            fill(255);
+            textSize(22);
+            text("Dinheiro Final: R$ " + floor(dinheiro), width/2, height/2 + 40);
+            text("Reputacao: " + reputacao + "%", width/2, height/2 + 70);
+            text("Saude do Solo: " + floor(saudeSolo) + "%", width/2, height/2 + 100);
+            
+            fill(150, 255, 150);
+            textSize(20);
+            text("Voce construiu um imperio agricola sustentavel!", width/2, height/2 + 150);
+            text("O campo e a cidade vivem em perfeita harmonia!", width/2, height/2 + 180);
+            
+            fill(200, 200, 255);
+            textSize(16);
+            text("Clique para jogar novamente", width/2, height/2 + 240);
+            textAlign(LEFT);
+
+            if (mouseIsPressed) {
+                restartGame();
+            }
+        }
+
+        function restartGame() {
+            producao = [];
+            demanda = [];
+            maquinas = [];
+            mensagens = [];
+
+            estoque = {
+                graos: 50,
+                energia: 30,
+                fibras: 40,
+                processados: 20
+            };
+
+            dinheiro = 1500;
+            reputacao = 80;
+            dia = 1;
+            estacao = "Primavera";
+            clima = "Ensolarado";
+            climaTimer = 0;
+            gameOver = false;
+            vitoria = false;
+            terraExpandida = false;
+            diaTimer = 0;
+
+            saudeSolo = 75;
+            ultimoCultivo = null;
+            diasDescanso = 0;
+            historicoRotacao = [];
+
+            for (let i = 0; i < 4; i++) {
+                producao.push(new Producao());
+            }
+
+            for (let i = 0; i < 3; i++) {
+                demanda.push(new Demanda(i));
+            }
+
+            fabrica = new Fabrica();
+        }
+
+        function mousePressed() {
+            return false;
+        }
+    </script>
+</body>
+</html>
